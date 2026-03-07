@@ -34,13 +34,15 @@ Most configuration values are sliders. Mode-based options use dropdown cycling i
 
 ## GitHub Actions web build (single compressed HTML)
 
-The workflow at `.github/workflows/gradle.yml` now builds TeaVM output and packages a single-page web client artifact:
+The workflow at `.github/workflows/gradle.yml` builds TeaVM output and packages a single compressed HTML artifact.
+
+> **Important:** this repository still targets the desktop LWJGL runtime for gameplay.  
+> The TeaVM HTML artifact is currently a web status/bootstrap page, not the full playable client.
 
 1. Run the **Build Infinity Web Client** workflow in the Actions tab.
 2. Download the `InfinityClient-Web` artifact.
-3. Use `infinity-client-1.12.2.html` directly, or `infinity-client-1.12.2.html.gz` for compressed hosting.
-
-4. Local equivalent build command: `./gradlew clean teavmJS` (the repo includes a compatibility alias task for TeaVM JS output).
+3. Open `infinity-client-1.12.2.html` (or serve `infinity-client-1.12.2.html.gz` with gzip enabled).
+4. Local equivalent build command: `./gradlew clean teavmJS` (compatibility alias task included).
 
 ## Getting Started:
 

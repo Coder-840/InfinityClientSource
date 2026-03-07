@@ -84,7 +84,7 @@ teavm.js {
     fastGlobalAnalysis = false
     processMemory = 1024
     entryPointName = 'main'
-    mainClass = 'Start'
+    mainClass = 'infinity.client.web.WebEntrypoint'
     outputDir = file("javascript")
     properties = null
     sourceMap = true
