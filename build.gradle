@@ -84,9 +84,19 @@ teavm.js {
     fastGlobalAnalysis = false
     processMemory = 1024
     entryPointName = 'main'
-    mainClass = 'Start'
+    mainClass = 'infinity.client.web.WebEntrypoint'
     outputDir = file("javascript")
     properties = null
     sourceMap = true
     debugInformation = false
+}
+
+
+def teavmEntryTask = ["generateJavaScript", "teavm", "teavmJs", "teavmjs"].find { tasks.findByName(it) != null }
+if (teavmEntryTask != null) {
+    tasks.register("teavmJS") {
+        group = "build"
+        description = "Compatibility alias for CI to build TeaVM JavaScript output"
+        dependsOn teavmEntryTask
+    }
 }
