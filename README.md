@@ -40,6 +40,8 @@ The workflow at `.github/workflows/gradle.yml` now builds TeaVM output and packa
 2. Download the `InfinityClient-Web` artifact.
 3. Use `infinity-client-1.12.2.html` directly, or `infinity-client-1.12.2.html.gz` for compressed hosting.
 
+4. Local equivalent build command: `./gradlew clean teavmJS` (the repo includes a compatibility alias task for TeaVM JS output).
+
 ## Getting Started:
 
 Prerequisites: Java 17 and JDK 17 or higher
