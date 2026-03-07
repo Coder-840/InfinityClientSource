@@ -1,5 +1,6 @@
 package net.minecraft.network;
 
+import infinity.client.InfinityClient;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.Bootstrap;
@@ -148,6 +149,9 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >>
         {
             try
             {
+                if (InfinityClient.get().onPacketReceive(p_channelRead0_2_)) {
+                    return;
+                }
                 ((Packet<INetHandler>)p_channelRead0_2_).processPacket(this.packetListener);
             }
             catch (ThreadQuickExitException var4)
@@ -170,6 +174,9 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >>
 
     public void sendPacket(Packet<?> packetIn)
     {
+        if (InfinityClient.get().onPacketSend(packetIn)) {
+            return;
+        }
         if (this.isChannelOpen())
         {
             this.flushOutboundQueue();
@@ -192,6 +199,9 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >>
 
     public void sendPacket(Packet<?> packetIn, GenericFutureListener <? extends Future <? super Void >> listener, GenericFutureListener <? extends Future <? super Void >> ... listeners)
     {
+        if (InfinityClient.get().onPacketSend(packetIn)) {
+            return;
+        }
         if (this.isChannelOpen())
         {
             this.flushOutboundQueue();

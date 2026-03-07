@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import infinity.client.InfinityClient;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.gson.JsonSyntaxException;
@@ -1548,6 +1549,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             this.renderWorldPass(2, partialTicks, finishTimeNano);
         }
 
+        InfinityClient.get().onRender(partialTicks);
         this.mc.mcProfiler.endSection();
     }
 
