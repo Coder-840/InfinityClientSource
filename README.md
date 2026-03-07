@@ -6,6 +6,40 @@ This repo contains the source code of my Eaglercraft 1.12 project. While I have 
 This client comes with Optifine built in.
 
 
+
+## Infinity Client modules
+
+This source now includes an in-game **Infinity Client** system with a dark click GUI (open with **Right-Shift**, disabled while typing in chat) and these modules:
+
+- KillAura
+- CrystalMacro
+- CrystalAura
+- Surround
+- AutoTotem
+- FastMine
+- FastPlace
+- PacketFly
+- ElytraFly
+- Velocity
+- PlayerESP
+- StorageESP
+- Blink
+- AirWalk
+- FastBow
+- ChunkTrails
+- NoDamage
+- AirPlace
+
+Most configuration values are sliders. Mode-based options use dropdown cycling in the GUI.
+
+## GitHub Actions web build (single compressed HTML)
+
+The workflow at `.github/workflows/gradle.yml` now builds TeaVM output and packages a single-page web client artifact:
+
+1. Run the **Build Infinity Web Client** workflow in the Actions tab.
+2. Download the `InfinityClient-Web` artifact.
+3. Use `infinity-client-1.12.2.html` directly, or `infinity-client-1.12.2.html.gz` for compressed hosting.
+
 ## Getting Started:
 
 Prerequisites: Java 17 and JDK 17 or higher
