@@ -90,3 +90,13 @@ teavm.js {
     sourceMap = true
     debugInformation = false
 }
+
+
+def teavmEntryTask = ["generateJavaScript", "teavm", "teavmJs", "teavmjs"].find { tasks.findByName(it) != null }
+if (teavmEntryTask != null) {
+    tasks.register("teavmJS") {
+        group = "build"
+        description = "Compatibility alias for CI to build TeaVM JavaScript output"
+        dependsOn teavmEntryTask
+    }
+}
