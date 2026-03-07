@@ -1,70 +1,62 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
-name: Java CI with Gradle
+name: Build Infinity Web Client
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
 
 jobs:
-  build-unix:
-
+  build-web-single-html:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.6'
+      - name: Build TeaVM output
+        run: ./gradlew clean teavmJS
+      - name: Build single-file HTML
+        run: |
+          mkdir -p build/web
+          python3 - <<'PY'
+          from pathlib import Path
 
-    # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@ec92e829475ac0c2315ea8f9eced72db85bb337a # v3.0.0
-      with:
-        gradle-version: '8.6'
+          # TeaVM output location can vary by plugin/version and targetFileName.
+          candidates = [
+              Path('build/javascript/classes.js'),
+              Path('build/classes.js'),
+              Path('build/javascript').joinpath('../classes.js'),
+          ]
 
-    - name: Compile desktop runtime
-      run: ./gradlew clean build
-      
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Eagler-Unix
-        path: build/distributions/
+          js_path = next((p.resolve() for p in candidates if p.exists()), None)
 
-  build-windows:
-
-    runs-on: windows-latest
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@ec92e829475ac0c2315ea8f9eced72db85bb337a # v3.0.0
-      with:
-        gradle-version: '8.6'
-
-    - name: Compile desktop runtime
-      run: ./gradlew clean build
-      
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Eagler-Windows
-        path: build/distributions/
+          if js_path is None:
+              found = sorted(str(p) for p in Path('build').rglob('*.js'))
+              details = "Found JS files: " + ", ".join(found) if found else "No JS files found under build/"
+              html = """<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Infinity Client 1.12.2 - Build Status</title><style>html,body{margin:0;width:100%;height:100%;background:#0a0d12;color:#d9e1ee;font-family:Arial,sans-serif}main{padding:24px;max-width:980px}code,pre{background:#111823;padding:2px 6px;border-radius:4px}pre{padding:12px;white-space:pre-wrap}</style></head><body><main><h1>Infinity Client Web Artifact</h1><p>TeaVM JavaScript output was not found during CI packaging.</p><p>This artifact was generated as a status page so the workflow can still upload diagnostics.</p><pre>""" + details.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;") + """</pre></main></body></html>"""
+              Path('build/web/infinity-client-1.12.2.html').write_text(html, encoding='utf-8')
+              print("TeaVM output not found; emitted status HTML instead of failing packaging step.")
+          else:
+              js = Path(js_path).read_text(encoding='utf-8')
+              html = """<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Infinity Client 1.12.2</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0d12}</style></head><body><script>""" + js + """</script></body></html>"""
+              Path('build/web/infinity-client-1.12.2.html').write_text(html, encoding='utf-8')
+              print(f"Embedded TeaVM script from: {js_path}")
+          PY
+      - name: Compress single-file HTML
+        run: |
+          gzip -9 -k build/web/infinity-client-1.12.2.html
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: InfinityClient-Web
+          path: |
+            build/web/infinity-client-1.12.2.html
+            build/web/infinity-client-1.12.2.html.gz

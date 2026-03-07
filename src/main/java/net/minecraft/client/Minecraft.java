@@ -1,5 +1,6 @@
 package net.minecraft.client;
 
+import infinity.client.InfinityClient;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
@@ -2026,6 +2027,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo
             this.myNetworkManager.processReceivedPackets();
         }
 
+        InfinityClient.get().onTick();
         this.mcProfiler.endSection();
         this.systemTime = getSystemTime();
     }
@@ -2065,6 +2067,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo
 
             if (flag)
             {
+                InfinityClient.get().onKeyEvent(i);
                 if (i == 62 && this.entityRenderer != null)
                 {
                     this.entityRenderer.switchUseShader();
