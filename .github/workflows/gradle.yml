@@ -28,9 +28,27 @@ jobs:
           mkdir -p build/web
           python3 - <<'PY'
           from pathlib import Path
-          js = Path('build/javascript/classes.js').read_text(encoding='utf-8')
-          html = """<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Infinity Client 1.12.2</title><style>html,body,canvas{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0d12}</style></head><body><canvas id='game_frame'></canvas><script>""" + js + """</script></body></html>"""
+
+          # TeaVM output location can vary by plugin/version and targetFileName.
+          candidates = [
+              Path('build/javascript/classes.js'),
+              Path('build/classes.js'),
+              Path('build/javascript').joinpath('../classes.js'),
+          ]
+
+          js_path = next((p.resolve() for p in candidates if p.exists()), None)
+
+          if js_path is None:
+              found = sorted(str(p) for p in Path('build').rglob('*.js'))
+              raise FileNotFoundError(
+                  "Could not find TeaVM output JS (expected classes.js). "
+                  + ("Found JS files: " + ", ".join(found) if found else "No JS files found under build/")
+              )
+
+          js = Path(js_path).read_text(encoding='utf-8')
+          html = """<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Infinity Client 1.12.2</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0d12}</style></head><body><script>""" + js + """</script></body></html>"""
           Path('build/web/infinity-client-1.12.2.html').write_text(html, encoding='utf-8')
+          print(f"Embedded TeaVM script from: {js_path}")
           PY
       - name: Compress single-file HTML
         run: |

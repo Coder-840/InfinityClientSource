@@ -42,7 +42,7 @@ The workflow at `.github/workflows/gradle.yml` builds TeaVM output and packages 
 1. Run the **Build Infinity Web Client** workflow in the Actions tab.
 2. Download the `InfinityClient-Web` artifact.
 3. Open `infinity-client-1.12.2.html` (or serve `infinity-client-1.12.2.html.gz` with gzip enabled).
-4. Local equivalent build command: `./gradlew clean teavmJS` (compatibility alias task included).
+4. Local equivalent build command: `./gradlew clean teavmJS` (compatibility alias task included; workflow auto-detects TeaVM `classes.js` output path).
 
 ## Getting Started:
 
