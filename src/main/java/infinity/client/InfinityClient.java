@@ -21,6 +21,7 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -28,7 +29,6 @@ import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemElytra;
 import net.minecraft.item.ItemEndCrystal;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTotem;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketEntityAction;
@@ -131,9 +131,9 @@ public class InfinityClient {
             if (mc().player == null || mc().world == null) return;
             EntityLivingBase target = mc().world.loadedEntityList.stream().filter(e -> e instanceof EntityLivingBase)
                     .map(e -> (EntityLivingBase)e)
-                    .filter(e -> e != mc().player && e.isEntityAlive() && mc().player.getDistance(e) <= range.getValue())
+                    .filter(e -> e != mc().player && e.isEntityAlive() && distanceToPlayer(e) <= range.getValue())
                     .filter(e -> e instanceof EntityPlayer || (mobs.getMode().equals("On") && e instanceof IMob))
-                    .min(Comparator.comparingDouble(e -> mc().player.getDistance(e))).orElse(null);
+                    .min(Comparator.comparingDouble(InfinityClient.this::distanceToPlayer)).orElse(null);
             if (target == null || System.currentTimeMillis() < nextHit) return;
             Vec3d vec = target.getPositionEyes(1f).subtract(mc().player.getPositionEyes(1f));
             float yaw = (float)(MathHelper.atan2(vec.z, vec.x) * (180D / Math.PI)) - 90f;
@@ -179,7 +179,7 @@ public class InfinityClient {
         CrystalAura() { super("CrystalAura", Category.COMBAT); }
         public void onTick() {
             EntityPlayer target = mc().world.playerEntities.stream().filter(p -> p != mc().player && p.isEntityAlive())
-                    .filter(p -> mc().player.getDistance(p) <= range.getValue()).min(Comparator.comparingDouble(p -> mc().player.getDistance(p))).orElse(null);
+                    .filter(p -> distanceToPlayer(p) <= range.getValue()).min(Comparator.comparingDouble(InfinityClient.this::distanceToPlayer)).orElse(null);
             if (target == null) return;
             if (mode.getMode().equals("Single")) {
                 placeObsidian(target.getPosition().add(target.getHorizontalFacing().getOpposite().getDirectionVec()));
@@ -218,10 +218,10 @@ public class InfinityClient {
     class AutoTotem extends Module { AutoTotem() { super("AutoTotem", Category.COMBAT); }
         public void onTick() {
             ItemStack off = mc().player.getHeldItemOffhand();
-            if (!(off.getItem() instanceof ItemTotem)) {
+            if (off.getItem() != Items.TOTEM_OF_UNDYING) {
                 for (int i = 0; i < 36; i++) {
                     ItemStack stack = mc().player.inventory.getStackInSlot(i);
-                    if (stack.getItem() instanceof ItemTotem) {
+                    if (stack.getItem() == Items.TOTEM_OF_UNDYING) {
                         mc().playerController.windowClick(0, i < 9 ? i + 36 : i, 40, net.minecraft.inventory.ClickType.SWAP, mc().player);
                         break;
                     }
@@ -391,7 +391,7 @@ public class InfinityClient {
 
     private EntityEnderCrystal nearestCrystal(double range) {
         return mc().world.loadedEntityList.stream().filter(e -> e instanceof EntityEnderCrystal).map(e -> (EntityEnderCrystal)e)
-                .filter(e -> mc().player.getDistance(e) <= range).min(Comparator.comparingDouble(e -> mc().player.getDistance(e))).orElse(null);
+                .filter(e -> distanceToPlayer(e) <= range).min(Comparator.comparingDouble(InfinityClient.this::distanceToPlayer)).orElse(null);
     }
 
     private boolean has(Class<? extends Item> itemClass) {
@@ -433,6 +433,10 @@ public class InfinityClient {
         GlStateManager.enableDepth();
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();
+    }
+
+    private double distanceToPlayer(Entity e) {
+        return mc().player.getDistance(e.posX, e.posY, e.posZ);
     }
 
     private void centerPlayer() {
