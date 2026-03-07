@@ -44,6 +44,8 @@ The workflow at `.github/workflows/gradle.yml` builds TeaVM output and packages 
 3. Open `infinity-client-1.12.2.html` (or serve `infinity-client-1.12.2.html.gz` with gzip enabled).
 4. Local equivalent build command: `./gradlew clean teavmJS` (compatibility alias task included; workflow auto-detects TeaVM `classes.js` output path).
 
+If TeaVM output is missing in CI, the workflow now emits an HTML status page instead of failing during the packaging step, so artifacts still upload for debugging.
+
 ## Getting Started:
 
 Prerequisites: Java 17 and JDK 17 or higher
